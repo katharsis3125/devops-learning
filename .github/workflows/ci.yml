@@ -83,4 +83,32 @@ jobs:
           sleep 2
           curl -fsS http://localhost:8080/health
           curl -fsS http://localhost:8080/version
+   deploy:
+    name: Deploy (self-hosted)
+    runs-on: self-hosted
+    needs: build_image
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deploy via docker compose
+        run: |
+          set -euo pipefail
+          cd /opt/devops-learning
+
+          docker compose pull
+          docker compose up -d
+
+          python - <<'PY'
+          import time, urllib.request
+          url = "http://127.0.0.1:8080/health"
+          for _ in range(30):
+            try:
+              r = urllib.request.urlopen(url, timeout=2)
+              print("health:", r.status, r.read().decode())
+              break
+            except Exception as e:
+              time.sleep(1)
+          else:
+            raise SystemExit("Healthcheck failed")
+          PY
 
