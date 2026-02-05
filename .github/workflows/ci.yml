@@ -90,7 +90,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     steps:
-        - name: Deploy via docker compose
+      - name: Deploy via docker compose
         run: |
           set -euo pipefail
           cd /opt/devops-learning
