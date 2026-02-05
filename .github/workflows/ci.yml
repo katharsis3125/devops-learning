@@ -83,6 +83,7 @@ jobs:
           sleep 2
           curl -fsS http://localhost:8080/health
           curl -fsS http://localhost:8080/version
+
   deploy:
     name: Deploy (self-hosted)
     runs-on: self-hosted
@@ -97,22 +98,14 @@ jobs:
           docker compose pull
           docker compose up -d
 
-          python - <<'PY'
-          import time
-          import urllib.request
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8080/health >/dev/null; then
+              echo "health OK"
+              break
+            fi
+            sleep 1
+          done
 
-          url = "http://127.0.0.1:8080/health"
-          for _ in range(30):
-              try:
-                  with urllib.request.urlopen(url, timeout=2) as r:
-                      body = r.read().decode()
-                      print("health:", r.status, body)
-                      break
-              except Exception:
-                  time.sleep(1)
-          else:
-              raise SystemExit("Healthcheck failed")
-          PY
-     
+          curl -fsS http://127.0.0.1:8080/health
+          curl -fsS http://127.0.0.1:8080/version
 
-    
