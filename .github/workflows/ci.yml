@@ -83,7 +83,7 @@ jobs:
           sleep 2
           curl -fsS http://localhost:8080/health
           curl -fsS http://localhost:8080/version
-   deploy:
+  deploy:
     name: Deploy (self-hosted)
     runs-on: self-hosted
     needs: build_image
