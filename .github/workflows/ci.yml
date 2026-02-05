@@ -2,7 +2,6 @@ name: CI
 
 on:
   push:
-    branches: ["**"]
   pull_request:
 
 jobs:
@@ -20,26 +19,29 @@ jobs:
         run: shellcheck *.sh
 
   test:
-   name: Test (bash syntax)
-   runs-on: ubuntu-latest
-   needs: lint
-   steps:
-     - uses: actions/checkout@v4
-     - name: Bash syntax check
-       run: bash -n kinit.sh
+    name: Test (bash syntax)
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bash syntax check
+        run: bash -n kinit.sh
 
-  deploy:
-    name: Deploy (demo)
+  build_image:
+    name: Build Docker image (demo)
     runs-on: ubuntu-latest
     needs: test
-    if: github.ref == 'refs/heads/main'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: "Deploy to /tmp/deploy (demo)"
+      - name: Build image
+        run: docker build -t devops-learning:${{ github.sha }} .
+
+      - name: Smoke test container
         run: |
-          mkdir -p /tmp/deploy
-          cp kinit.sh /tmp/deploy/
-          echo "Deployed kinit.sh to /tmp/deploy"
+          docker run -d --rm -p 8080:8080 --name demo -e APP_VERSION=${{ github.sha }} devops-learning:${{ github.sha }}
+          sleep 2
+          curl -fsS http://localhost:8080/health
+          curl -fsS http://localhost:8080/version
 
