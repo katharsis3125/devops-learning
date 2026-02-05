@@ -15,7 +15,7 @@ fi
 echo "$password" | kinit "$username" 2>/tmp/kinit_error.log
 
 # Проверка результата
-if kinit user@REALM; then
+f kinit user@REALM; then
     echo "Kerberos ticket obtained successfully"
 else
     echo "Failed to obtain Kerberos ticket" >&2
@@ -24,4 +24,4 @@ fi
 
 # Очистка временных файлов
 rm -f /tmp/kinit_error.log
-
+# Проверка
