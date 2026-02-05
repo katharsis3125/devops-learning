@@ -15,10 +15,11 @@ fi
 echo "$password" | kinit "$username" 2>/tmp/kinit_error.log
 
 # Проверка результата
-if [ $? -eq 0 ]; then
-    zenity --info --text="Kerberos-аутентификация прошла успешно"
+if kinit user@REALM; then
+    echo "Kerberos ticket obtained successfully"
 else
-    zenity --error --text="Ошибка Kerberos:\n$(cat /tmp/kinit_error.log)"
+    echo "Failed to obtain Kerberos ticket" >&2
+    exit 1
 fi
 
 # Очистка временных файлов
